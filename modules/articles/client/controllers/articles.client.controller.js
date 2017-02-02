@@ -18,7 +18,9 @@ angular.module('articles').controller('ArticlesController', ['$scope', '$statePa
       // Create new Article object
       var article = new Articles({
         title: this.title,
-        content: this.content
+        content: this.content,
+        lon: this.lon,
+        lat: this.lat
       });
 
       // Redirect after save
@@ -28,6 +30,8 @@ angular.module('articles').controller('ArticlesController', ['$scope', '$statePa
         // Clear form fields
         $scope.title = '';
         $scope.content = '';
+        $scope.lon = 0;
+        $scope.lat = 0;
       }, function (errorResponse) {
         $scope.error = errorResponse.data.message;
       });
@@ -80,5 +84,25 @@ angular.module('articles').controller('ArticlesController', ['$scope', '$statePa
         articleId: $stateParams.articleId
       });
     };
+
+    $scope.$on('mapInitialized', function (event, map) {
+      var marker = map.markers[0];
+
+      $scope.$watch('article.lat + article.lon', function (newVal, oldVal) {
+        if (newVal === oldVal) { return; }
+        // checks if value has changed 
+        map.setCenter({ lat: $scope.article.lat, lng: $scope.article.lon });
+        marker.setPosition({ lat: $scope.article.lat, lng: $scope.article.lon });
+      });
+    });
+
+    //marker link
+    $scope.gotolink = function (event, i) {
+      $location.path('articles/' + i._id);
+    };
+
+    $scope.pinClicked = function(marker) {
+      console.log(marker)
+    } 
   }
 ]);
